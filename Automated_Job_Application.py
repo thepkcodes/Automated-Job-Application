@@ -226,7 +226,41 @@ def scrape_jobs(keywords, location, platforms, num_results = 20):
     # Return the specified number of results
     return all_jobs[:num_results]
 
+def calculate_matching_score(job_desc, user_skills, user_experience):
+    """Calculate a matching score between job and user profile"""
+    
+    # Convert inputs to lowercase for case-insensitive matching
+    job_desc_lower = job_desc_lower()
 
+    # Extract user skills and convert to lowercase
+    user_skills_list = [skill.strip().lower() for skill in user_skills.split(',')]
+
+    # Count how many user skills appear in the job description
+    matched_skills = sum(1 for skill in user_skills_list if skill in job_desc_lower)
+
+    # Calculate basic matching score based on skills match ratio
+    skill_match_ratio = matched_skills / len(user_skills_list) if user_skills_list else 0
+
+    # Extract years of experience from user profile
+    experience_years = 0
+    experience_match = re.search(r'(\d+)\s*(?:years|yrs)', user_experience.lower())
+    if experience_match:
+        experience_years = int(experience_match.group(1))
+
+    # Check if job description has experience requirements
+    job_req_years = 0
+    job_exp_match = re.search(r'(\d+)\+?\s*(?:years|yrs)', job_desc_lower)
+    if job_exp_match:
+        job_req_years = int(job_exp_match.group(1))
+    
+    # Experience matching component (1.0 if user has >= required experience)
+    exp_match = min(1.0, experience_years / job_req_years) if job_req_years > 0 else 0.5
+
+    # Combine skill and experience components (weighted)
+    matching_score = (skill_match_ratio * 0.7) + (exp_match * 0.3)
+
+    # Scale to 0-100%
+    return round(matching_score * 100, 1)
  
 
 
