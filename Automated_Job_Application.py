@@ -308,7 +308,24 @@ def get_user_profile():
     else:
         return None
     
-def 
+def save_user_profile(profile_data):
+    """Save user profile to database"""
+    conn = sqlite3.connect('job_applications.db')
+    c = conn.cursor()
+
+    c.execute('''
+    INSERT INTO user_profile (full_name, email, phone, resume_path, skills, experience, education, preference)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        profile_data["full_name"], profile_data["email"], profile_data["phone"],
+        profile_data["resume_path"], profile_data["skills"], profile_data["experience"],
+        profile_data["education"], profile_data["performance"]
+    ))
+
+    conn.commit()
+    conn.close()
+
+
  
 
 
