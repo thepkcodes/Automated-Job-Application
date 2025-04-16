@@ -261,6 +261,38 @@ def calculate_matching_score(job_desc, user_skills, user_experience):
 
     # Scale to 0-100%
     return round(matching_score * 100, 1)
+
+def apply_to_job(job, user_profile):
+    """Simulate applying to a job"""
+
+    success = random.random() < 0.9
+
+    if success:
+        conn = sqlite3.connect('job_applications.db')
+        c = conn.cursor()
+
+        matching_score = calculate_matching_score(
+            job["job_description"],
+            user_profile["skilles"],
+            user_profile["experience"]
+        )
+
+        c.execute('''
+        INSERT INTO JOBS (job_title, company, location, job_description, salary,
+                  job_url, platform, date_applied, status, matching_score, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            job["job_title"], job["company"], job["location"], job["job_description"],
+            job["salary"], job["job_url"], job["platform"], datetime.now().strftime(%Y-%m-%d),
+            "Applied", matching_score, "Auto-applied bu job Application Agent"
+        ))
+
+        conn.connect()
+        conn.close()
+
+    return success
+
+def get_user_profile():
  
 
 
