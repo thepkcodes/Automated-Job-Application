@@ -293,6 +293,22 @@ def apply_to_job(job, user_profile):
     return success
 
 def get_user_profile():
+    """Get user profile from database"""
+    conn = sqlite3.connect('job_applications.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM user_profile ORDER By id DESC LIMIT 1')
+    result = c.fetchone()
+
+    conn.close()
+
+    if result:
+        return dict(result)
+    else:
+        return None
+    
+def 
  
 
 
