@@ -325,7 +325,34 @@ def save_user_profile(profile_data):
     conn.commit()
     conn.close()
 
+def get_applied_jobs():
+    """Get list of jobs the user has applied to"""
+    conn = sqlite3.connect('job_applications.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
 
+    c.execute('SELECT * FROM jobs ORDER BY date_applied DESC')
+    results = [dict(row) for row in c.fetchall()]
+
+    conn.close()
+    return results
+
+def update_job_status(job_id, new_status, notes = None):
+    """Update the status of a job application"""
+    conn = sqlite3.connect('job_applications.db')
+    c = conn.cursor()
+
+    if notes:
+        c.execute('UPDATE jobs SET status = ?, notes = ? WHERE id = ?',
+                  (new_status, notes, job_id))
+    else:
+        c.execute('SELECT notes FROM jobs WHERE id = ?', (job_id))
+        current_notes = c.fetchone()[0]
+        c.execute('UPDATE jobs SET STATUS = ?', notes = ? WHERE id = ?',
+                  (new_status, current_notes, job_id))
+        
+    conn.commit()
+    conn.close()
  
 
 
