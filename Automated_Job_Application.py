@@ -482,6 +482,69 @@ if page == "Dashboard":
         """, unsafe_allow_html = True)
         st.button("Search Jobs", key = "search_jobs_dashboard",
                 on_click = lambda: st.session_state.update({"page": "Job Search"}))
+        
+    with col2:
+        st.markdown("""
+        <div style = "text-align: center;">
+            <h4>📊 View Analytics</h4>
+            <p>Analyze your application performance and insights</p>
+        </div>
+        """, unsafe_allow_html = True)
+        st.button("View Analytics", key = "view_analytics_dashboard",
+                on_click = lambda: st.session_state.update({"page": "Analytics"}))
+        
+    with col3:
+        st.markdown("""
+        <div style = "text-align: center;">
+            <h4>📋 Track Application</h4>
+            <p>Update and manage your job applications</p>
+        </div>
+        """, unsafe_allow_html = True)
+        st.button("Track Jobs", key = "track_jobs_dashboard",
+                on_click = lambda: st.session_state.update({"page": "Job Tracker"}))
+        
+    st.markdown("</div>", unsafe_allow_html = True)
+
+elif page == "Job Search":
+    st.markdown("<h1 class = 'main-header'>Job Search & Auto-Apply</h1>", unsafe_allow_html = True)
+
+    user_profile = get_user_profile()
+    if not user_profile:
+        st.warning("Please set up your profile before searching for jobs")
+        if st.button("Go to Profile Setup"):
+            st.session_state.page = "Profile Setup"
+        st.stop()
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        st.markdown("<div class = 'card'>", unsafe_allow_html = True)
+        st.markdown("<h3>Search Parameters</h3>", unsafe_allow_html = True)
+
+        with st.form("job_search_form"):
+            default_keywords = ", ".join(user_profile["skills"].split(",")[:3])
+            keywords = st.text_input("Keywords (skills, job titles)", values = default_keywords)
+
+            default_location = ""
+            if user_profile["preferences"]:
+                location_match = re.search(r'location[:\s]+([\w\s,]+)', user_profile["preferences"], re.IGNORECASE)
+                if location_match:
+                    default_keywords = location_match.group(1).strip()
+
+                location = st.text_input("Location", value = default_location)
+
+                platforms = st.multiselect(
+                    "Job Platforms",
+                    ["LinkedIn", "Indedd", "Glassdoor", "Welcome to the Jungle", "Handshake", "Built In", "Google Jobs", "ZipRecruiter", "Monster"],
+                    default = ["LinkedIn", "Indeed", "Glassdoor", "Google Jobs"]
+                )
+
+                num_results = st.slider("Maximum Results", min_value = 10, max_value = 100, value = 20, step = 10)
+
+                search_button = st.form_submit_button("Search Jobs")
+
+            # Auto-apply settings
+            
  
 
 
