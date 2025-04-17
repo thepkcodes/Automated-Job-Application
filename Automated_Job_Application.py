@@ -147,7 +147,7 @@ def scrape_jobs(keywords, location, platforms, num_results = 20):
     ] 
 
     locations = [
-        "CA", "NY", "WA", "TX", "CT", "MA", "GA", "FL", "OR", "CO", "IL", "AZ"
+        "CA", "NY", "WA", "TX", "CT", "MA", "GA", "FL", "OR", "CO", "IL", "AZ", "MO", "NJ", "NC"
     ]
 
     # For each selected platform, generate simulated job listings
@@ -544,7 +544,7 @@ elif page == "Job Search":
                 search_button = st.form_submit_button("Search Jobs")
 
             # Auto-apply settings
-            
+
  
 
 
