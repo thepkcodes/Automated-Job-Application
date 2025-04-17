@@ -353,6 +353,83 @@ def update_job_status(job_id, new_status, notes = None):
         
     conn.commit()
     conn.close()
+
+if page == "Dashboard":
+    st.markdown("<h1 class = 'main-header'>Job Application Agent Dashboard</h1>", unsafe_allow_html = True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("<div class = 'card'>", unsafe_allow_html = True)
+        st.markdown("h3>Quick Stats</h3>", unsafe_allow_html = True)
+
+        applied_jobs = get_applied_jobs()
+        total_applications = len(applied_jobs)
+
+        statuses = {}
+        platforms = {}
+        recent_activity = []
+
+        for job in applied_jobs:
+            status = job["status"]
+            platform = job["platform"]
+
+            if status in statuses:
+                statuses[status] += 1
+            else:
+                statuses[status] = 1
+
+            if platform in platforms:
+                platforms[platform] += 1
+            else:
+                platforms[platform] = 1
+
+            date_applied = datetime.strptime(job["date_applied"], "%Y-%m-%d").date()
+            days_ago = (datetime.now().date() - date_applied).days
+            if days_ago <= 7:
+                recent_activity.append(job)
+
+        st.metric("Total Applications", total_applications)
+
+        status_cols = st.columns(4)
+        with status_cols[0]:
+            applied_count = statuses.get("Applied", 0)
+            st.metric("Applied", applied_count)
+
+        with status_cols[1]:
+            interview_count = statuses.get("Interview", 0)
+            st.metric("Interviews", interview_count)
+
+        with status_cols[2]:
+            offer_count = statuses.get("Offer", 0)
+            st.metric("Offers", offer_count)
+
+        with status_cols[3]:
+            rejected_count = statuses.get("Rejected", 0)
+            st.metric("Rejected", rejected_count)
+
+        if applied_jobs:
+            st.markdown("<h4>Weekly Applications Activity</h4>", unsafe_allow_html = True)
+
+            today = datetime.now().date()
+            date_range = [(today - pd.Timedelta(days = i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+            daily_counts = {date: 0 for date in date_range}
+
+            for job in applied_jobs:
+                if job["date_applied"] in daily_counts:
+                    daily_counts[job["date_applied"]] += 1
+
+            activity_df = pd.DataFrame({
+                "Date": list(daily_counts.values())
+            })
+
+            st.bar_chart(activity_df.set_index("Date"))
+
+        st.markdown("</div>", unsafe_allow_html = True)
+
+    with col2:
+        
  
 
 
