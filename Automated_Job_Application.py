@@ -429,7 +429,59 @@ if page == "Dashboard":
         st.markdown("</div>", unsafe_allow_html = True)
 
     with col2:
-        
+        st.markdown("<div class = 'card'>", unsafe_allow_html = True)
+        st.markdown("<h3>Recent Activity</h3", unsafe_allow_html = True)
+
+        if recent_activity:
+            for job in recent_activity[:5]:
+                status_class = f"status-{job['status'].lower()}"
+
+                st.markdown(f"""
+                <div style = "margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px soldi #eee;">
+                    <strong>{job['job_title']}</strong> at {job['company']}
+                    <br>
+                    <span class = "{status_class}">{job['status']}</span • {job['date_applied']} • {job['platform']}
+                </div>
+                """, unsafe_allow_html = True)
+        else:
+            st.info("No recent application activity to display")
+
+        st.markdown("<div>", unsafe_allow_html = True)
+
+        st.markdown("<div class = 'card'>", unsafe_allow_html = True)
+        st.markdown("h3>Profile Summary</h3>", unsafe_allow_html = True)
+
+        user_profile = get_user_profile()
+        if user_profile:
+            st.markdown(f"""
+            <p><strong>Name:</strong> {user_profile['full_name']}</p>
+            <p><strong>Top Skills:</strong> {', '.join(user_profile['skills'].split(',')[:5])}...</p>
+            <p><strong>Experience:</strong> {user_profile['experience'][:100]}...</p>
+            """, unsafe_allow_html = True)
+
+            st.button("Edit Profile", key = "edit_profile_dashboard",
+                    on_click = lambda: st.session_state.update({"page": "Profile Setup"}))
+        else:
+            st.markdown("Profile not set up yet. Please go to Profile Setup!")
+            st.button("Set Up Profile", key = "setup_profile_dashboard",
+                    on_click = lambda: st.session_state.update({"page": "Profile Setup"}))
+            
+        st.markdown("</div>", unsafe_allow_html = True)
+
+    st.markdown("<div class = 'card'>", unsafe_allow_html = True)
+    st.markdown("<h3>Recommended Actions</h3>", unsafe_allow_html = True)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("""
+        <div style = "text-align: center;">
+            <h4>🔍 Find Jobs</h4>
+            <p>Search for new job opportunities based on your profile</p>
+        </div>
+        """, unsafe_allow_html = True)
+        st.button("Search Jobs", key = "search_jobs_dashboard",
+                on_click = lambda: st.session_state.update({"page": "Job Search"}))
  
 
 
