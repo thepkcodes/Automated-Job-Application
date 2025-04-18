@@ -697,6 +697,74 @@ elif page == "Profile Setup":
         
         submitted = st.form_submit_button("Save Profile")
 
+    if submitted:
+        profile_data = {
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "resume_path": resume_path,
+            "skills": skills,
+            "experience": experience,
+            "education": education,
+            "preferences": preferences
+        }
+
+        save_user_profile(profile_data)
+        st.success("Profile saved successfully!")
+
+elif page == "Application Settings":
+    st.markdown("<h1 class='main-header'>Application Settings</h1>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("<div class ='card'>", unsafe_allow_html=True)
+        st.markdown("<h3>Auto-Apply Settings</h3>", unsafe_allow_html=True)
+
+        with st.form("auto_apply_settings"):
+            st.checkbox("Enable Auto-Apply Feature", value=True, key="enable_auto_apply")
+            
+            st.number_input("Maximum Application Per Day", min_value=1, max_value=50, value=10, key="max_applications")
+
+            st.slider("Minimum Match Score for Auto-Apply (%)", min_value=0, max_value=100, value=75, key="min_match_score")
+
+            st.multiselect(
+                "Preferred Job Platforms",
+                ["LinkedIn", "Indeed", "Glassdoor", "Welcome to the Jungle", "Handshake", "Built In", "Google Jobs", "ZipRecruiter",
+                 "Monster"],
+                 default=["LinkedIn", "Indeed", "Glassdoor"],
+                 key="preferred_platforms"
+            )
+
+            st.text_area("Auto-Apply Message Template",
+                         value="Dear Hiring Manager, \n\nI am writing to express my interest in the [JOB_TITLE] position at [COMPANY]. With my experience in [SKILLS], I believe I would be a great fit for this role. \n\nThank you for your consideration. \n\nBest regards, \n[FULL_NAME]",
+                         height=150,
+                         help="Customize the message template for auto-applications. Use [JOB_TITLE], [COMPANY], [SKILLS, [FULL_NAME] as placeholders.",
+                         key="message_template")
+            
+            st.form_submit_button("Save Auto-Apply Settings")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<h3>Job Filter Settings</h3>", unsafe_allow_html=True)
+
+        with st.form("job_filter_settings"):
+            st.multiselect(
+                "Job Types",
+                ["Full-time", "Part-time", "Contract", "Temporary", "Internship", "Remote"],
+                default=["Full-time", "Remote"],
+                key="job_types"
+            )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.number_input("Minimum Salary ($K)")
+    
+
+
+
 
 
 
