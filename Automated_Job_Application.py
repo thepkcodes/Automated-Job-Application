@@ -544,6 +544,161 @@ elif page == "Job Search":
                 search_button = st.form_submit_button("Search Jobs")
 
             # Auto-apply settings
+            st.markdown("<h3> Auto-Apply Settings</h3>", unsafe_allow_html=True)
+            
+            min_match_score = st.slider("Minimum Match Score (%)", 0, 100, 70)
+
+            auto_apply_all = st.checkbox("Apply to All Matching Jobs Automatically", value=False)
+
+            if auto_apply_all:
+                max_daily_applications = st.number_input("Maximum Daily Applications", min_value=1, max_value=50, value=10)
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<h3>Search Results</h3>", unsafe_allow_html=True)
+
+        if "job_results" not in st.session_state:
+            st.session_state.job_results = []
+
+        if search_button:
+            with st.spinner("Searching for jobs across platforms..."):
+                time.sleep(2)
+
+                jobs = scrape_jobs(keywords, location, platforms, num_results)
+
+                for job in jobs:
+                    job["matching_score"] = calculate_matching_score(
+                        job["job_description"],
+                        user_profile["skills"],
+                        user_profile["experience"]
+                    )
+
+                jobs.sort(key=lambda x: x["matching_score"], reverse=True)
+
+                st.session_state.job_results = jobs
+                st.success(f"Found {len(jobs)} matching jobs!")
+
+                if auto_apply_all:
+                    matching_jobs = [job for job in jobs if job["matching_score"] >= min_match_score]
+                    jobs_to_apply = matching_jobs[:max_daily_applications] if auto_apply_all else[]
+
+                    if jobs_to_apply:
+                        applied_count = 0
+                        with st.spinner(f"Auto-applying to {len(jobs_to_apply)} jobs..."):
+                            for job in jobs_to_apply:
+                                success = apply_to_job(job, user_profile)
+                                if success:
+                                    applied_count += 1
+
+                                time.sleep(0.5)
+
+                        st.success(f"Successfully applied to {applied_count} jobs!")
+
+        if st.session_state.job_results:
+            for i, job in enumerate(st.session_state.job_results):
+                if job["matching_score"] >= 80:
+                    score_class = "match-score-high"
+                elif job["matching_score"] >= 60:
+                    score_class = "match-score-medium"
+                else:
+                    score_class = "match-score-low"
+
+                st.markdown(f"""
+                <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                    <h4>{job["job_title"]} at {job["company"]}</h4>
+                    <p>📍 {job["location"]} • 💰 {job["salary"]} • 🔗 {job["platform"]}</p>
+                    <p><span class="{score_class}">Match Score: {job["matching_score"]}%</span></p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                col1, col2 = st.columns([3, 1])
+
+                with col1:
+                    if st.button(f"View Details #{i}", key = f"view_{i}"):
+                        st.session_state[f"show_details_{i}"] = not st.session_state.get(f"show_details_{i}", False)
+
+                with col2:
+                    conn = sqlite3.connect("job_application.db")
+                    c = conn.cursor()
+                    c.execute('SELECT COUNT(*) FROM jobs WHERE job_url = ?', (job["job_url"],))
+                    already_applied = c.fetchone()[0] > 0
+                    conn.close()
+
+                    if already_applied:
+                        st.button("Already Applied", key=f"applied_{i}", disabled=True)
+                    else:
+                        if st.button(f"Apply Now #{i}", key=f"apply_{i}"):
+                            with st.spinner("Applying to job..."):
+                                time.sleep(2)
+                                success = apply_to_job(job, user_profile)
+
+                                if success:
+                                    st.success("Successfully applied!")
+                                else:
+                                    st.error("Application failed. Please try again or apply manually.")
+
+                if st.session_state.get(f"show_details_{i}", False):
+                    st.markdown(f"""
+                    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                        <h5>Job Description</h5>
+                        <p>{job["job_description"]}</p>
+                        <p><strong>URL:</strong> <a href="{job["job_url"]} target="_blank">{job["job_url"]}</a></p>
+                        <p><strong>Date Posted:</strong> {job["date_posted"]}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("Search for jobs to see results here")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+elif page == "Profile Setup":
+    st.markdown("<h1 class='main-header'>Profile Setup</h1>", unsafe_allow_html=True)
+
+    existing_profile = get_user_profile()
+
+    with st.form("profile_setup_form"):
+        st.markdown("<h3>Personal Information</h3>", unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col2:
+            full_name = st.text_input("Full Name", value=existing_profile["full_name"] if existing_profile else "")
+            email = st.text_input("Email", value=existing_profile["email"] if existing_profile else "")
+
+        with col2:
+            phone = st.text_input("Phone Number", value=existing_profile["phone"] if existing_profile else "")
+            resume_path = st.text_input("Resume File Path (optional)",
+                                value=existing_profile["resume_path"] if existing_profile else "")
+            
+        st.markdown("<h3>Skills & Experience</h3>", unsafe_allow_html=True)
+
+        skills = st.text_area("Skills (comma separated)",
+                    value=existing_profile["skills"] if existing_profile else "",
+                    height = 100,
+                    help="Enter your skills separated by commas")
+        
+        experience = st.text_area("Professional Experience",
+                        value=existing_profile["experience"] if existing_profile else "",
+                        height=150,
+                        help="Enter your work experience, including years of experience in relevant roles")
+        
+        education = st.text_area("Education",
+                        value=existing_profile["education"] if existing_profile else "",
+                        height=100)
+        
+        st.markdown("<h3>Job Preferences</h3>", unsafe_allow_html=True)
+
+        preferences = st.text_area("Job Preferences",
+                        value=existing_profile["preferences"] if existing_profile else "",
+                        height=100,
+                        help="Enter your job preferences such as: location, remote/hybrid/in-office, salary range, etc.")
+        
+        submitted = st.form_submit_button("Save Profile")
+
+
+
 
  
 
