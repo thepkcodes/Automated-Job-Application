@@ -760,7 +760,62 @@ elif page == "Application Settings":
             col1, col2 = st.columns(2)
 
             with col1:
-                st.number_input("Minimum Salary ($K)")
+                st.number_input("Minimum Salary ($K)", min_value=0, max_value=500, value=50, key="min_salary")
+
+            with col2:
+                st.number_input("Maximum Salary ($K)", min_value=0, max_value=500, value=200, key="max_salary")
+
+            st.multiselect(
+                "Industry Preferences",
+                ["Technology", "Healthcare", "Finance", "Education", "Retail", "Manufacturing", "Media", "Consulting", "Non-profit",
+                 "Government"],
+                 default=["Technology", "Finance", "Consulting"],
+                 key="industries"
+            )
+
+            st.text_input("Location Preferences", value="Remote, New York, San Francisco, Boston", key="locations")
+
+            st.form_submit_button("Save Job Filter Settings")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("</div class= 'card'>", unsafe_allow_html=True)
+        st.markdown("<h3>Notfication Settings</h3>", unsafe_allow_html=True)
+
+        with st.form("notification_settings"):
+            st.checkbox("Email Notifications", value=True, key="email_notifications")
+
+            st.text_input("Notification Email", value="", key="notification_email",
+                          help="Email address to receive job application notifications")
+            
+            st.multiselect(
+                "Notify Me About",
+                ["New matching jobs", "Successful applications", "Application status changes",
+                 "Interview invitations", "Job offers", "Daily Summary"],
+                 default=["Successful applications", "Interview invitations", "Job offers"],
+                 key="notification_types"
+            )
+
+            st.select_slider(
+                "Notification Frequency",
+                options=["Immediately", "Hourly", "Daily", "Weekly"],
+                value="Daily"
+                key="notification_frequency"
+            )
+
+            st.form_submit_button("Save Notification Settings")
+    
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class = 'card'>", unsafe_allow_html=True)
+        st.markdown("<h3>Data Management</h3>", unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("Export All Data (CSV)"):
+                
     
 
 
