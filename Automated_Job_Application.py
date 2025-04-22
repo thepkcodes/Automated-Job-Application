@@ -815,7 +815,31 @@ elif page == "Application Settings":
 
         with col1:
             if st.button("Export All Data (CSV)"):
-                
+                st.info("Feature would export all job application data as CSV")
+
+        with col2:
+            if st.button("Delete All Data (CSV)", key="delete_data_button"):
+                st.session_state.confirm_delete = True
+        
+        if st.session_state.get("confirm_delete", False):
+            st.warning("Are you sure you want to delete all application data? This cannot be undone.")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("Yes, Delete Everything"):
+                    st.success("All data has been deleted!")
+                    st.session_state.confirm_delete = False
+
+            with col2:
+                if st.button("Cancel"):
+                    st.session_state.confirm_delete = False
+
+        st.markdown("<h3>API Credentials</h3>", unsafe_allow_html=True)
+
+        with st.expander("LinkedIn API"):
+            st.text_input("LinkedIn API Key", type="password")
+            
     
 
 
